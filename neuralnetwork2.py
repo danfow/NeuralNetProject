@@ -1,4 +1,5 @@
 from cgi import test
+from matplotlib.pyplot import axis
 import pandas as pd
 import numpy as np
 
@@ -9,6 +10,10 @@ tweets = pd.read_csv("congressional_tweet_training_data.csv")
 
 
 
+#resource list used to build project
+#https://www.tensorflow.org/tutorials/load_data/csv
+#https://www.tensorflow.org/tutorials/keras/classification
+#https://www.tensorflow.org/api_docs/python/tf/keras/activations/softmax
 
 
 
@@ -194,13 +199,13 @@ tweet_preprocessing2(features_dict2)
 def tweet_model(preprocessing_head, inputs):
   body = tf.keras.Sequential([
     #layers.Dense(input_shape = (516,)),
-    layers.Dense(50),
-    layers.Dense(500),
-    layers.Dense(50),
-    layers.Dense(50),
-    layers.Dense(150,activation = 'relu'),
-    layers.Dense(2),
-    #layers.Softmax()
+    layers.Dense(450),
+    layers.Dense(200),
+    #layers.Dense(100),
+    #layers.Dense(50),
+    #layers.Dense(50),
+    layers.Dense(15,activation = 'relu'),
+    layers.Dense(2,activation=tf.keras.activations.softmax),
   ])
 
   preprocessed_inputs = preprocessing_head(inputs)
@@ -229,24 +234,45 @@ print (tweet_features.info())
 
 
 
-tweet_models.fit(x=tweet_features_dict, y=tweet_labels, epochs=3)
+tweet_models.fit(x=tweet_features_dict, y=tweet_labels, epochs=5)
 
 test_loss, test_acc = tweet_models.evaluate(tweet_features_dict2,  test_labels, verbose=2)
 
 print('\nTest accuracy:', test_acc)
 
 print("tweet model ",tweet_models )
+#print ("model",tweet_models.summary())
 
 #probability_model = tf.keras.Sequential([tweet_models, 
-                                         #tf.keras.layers.Softmax()])
+                                         #tf.keras.layers.Softmax(axis=-1)])
+
+
+
+#print ("model",tweet_models.summary())
 
 predictions = tweet_models.predict(tweet_features_dict2)
 
+#predictions = tf.keras.activations.softmax(predictions,axis=-1)
 
 print(predictions)
 for i in range (0,100):
   #print ("prediction of neural net is ", np.argmax(predictions[i]), "real value is ", test_labels.iloc[i])
-  print ("prediction values were ", predictions[i],"prediction of neural net is ", np.argmax(predictions[i]), "real value is ", test_labels[i])
+  predicted_value = np.argmax(predictions[i])
+  if (predicted_value == 1):
+    predicted_value = 'R'
+  else:
+    predicted_value = 'D'
+  
+  real_value = test_labels[i]
+
+  if (real_value == 1):
+    real_value = 'R'
+  else:
+    real_value = 'D'
+
+
+  #print ("prediction probabilites were ", predictions[i],"prediction of neural net is ", np.argmax(predictions[i]), "real value is ", test_labels[i])
+  print ("prediction probabilites were ", predictions[i],"prediction of neural net is ", predicted_value, "real value is ", real_value)
   #print("real value is" , test_labels.iloc[i])
 
 
